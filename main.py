@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from src.routers.user import router as user_router
 from src.routers.pathParameter import router as path_parameter_router
 from src.routers.queryParameters import router as query_parameter_router
@@ -10,8 +11,17 @@ from src.routers.errorHttpException import router as error_router
 from src.routers.dependency import router as dependency_router
 from src.routers.authSafe import router as auth_router
 from src.routers.jwtToken import router as jwt_router
+from src.routers.cors import router as cors_router
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 单个注册
 # 把routers里面的user的router注册到app上
@@ -27,6 +37,7 @@ app.include_router(error_router, prefix="/errors", tags=["错误处理模块"])
 app.include_router(dependency_router, prefix="/dependencies", tags=["依赖项模块"])
 app.include_router(auth_router, prefix="/auth", tags=["安全验证"])
 app.include_router(jwt_router, prefix="/jwt", tags=["jwt令牌校验"])
+app.include_router(cors_router, prefix="/cors", tags=["CORS跨域"])
 
 
 # # 统一维护所有子路由配置
