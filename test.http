@@ -1,0 +1,157 @@
+# GET http://127.0.0.1:8000/query/users/452423/items/435334?q=哈哈哈哈&short=off HTTP/1.1
+
+
+# 测试请求体
+# POST http://127.0.0.1:8000/request/items HTTP/1.1
+#     Content-Type: application/json
+
+#     {
+#         "name": "EuLa",
+#         "height": 1.75,
+#         "description": "优菈是一个非常漂亮的小姐姐，身材高挑，胸部丰满，皮肤白皙，性格开朗，喜欢运动和旅行。她有一双迷人的大眼睛和性感的嘴唇，总是带着自信的微笑。她喜欢穿时尚的衣服，展现自己的魅力。",
+#         "tax": 0.15
+#     }
+
+# 测试请求体加路径参数 + 查询参数
+# PUT http://127.0.0.1:8000/request/items/1?query=EuLa HTTP/1.1
+#     Content-Type: application/json
+
+#     {
+#         "name": "EuLa",
+#         "height": 1.75,
+#         "description": "优菈是一个非常漂亮的小姐姐，身材高挑，胸部丰满，皮肤白皙，性格开朗，喜欢运动和旅行。她有一双迷人的大眼睛和性感的嘴唇，总是带着自信的微笑。她喜欢穿时尚的衣服，展现自己的魅力。",
+#         "tax": 0.15
+#     }
+
+# 测试查询参数和字符串校验
+# GET  http://127.0.0.1:8000/query/check/?q=fixedquery道前叩首三千年回首凡尘不做仙
+
+# 测试查询参数列表多个值
+# GET http://127.0.0.1:8000/query/list/?q=道&q=前&q=叩&q=首&q=三&q=千&q=年
+
+# 测试自定义校验
+# GET http://127.0.0.1:8000/query/valid/?id=isbn-9781529046137 HTTP/1.1
+
+# 测试path校验
+# GET http://127.0.0.1:8000/path/vaild/55?q=送君千里终有一别 HTTP/1.1
+
+# 测试请求参数规定
+# GET  http://127.0.0.1:8000/query/model/?limit=10&tags=bb&tags=aa HTTP/1.1
+
+# # 测试请求体-多个参数
+# PUT http://127.0.0.1:8000/request/many/1 HTTP/1.1
+# Content-Type: application/json
+
+# {
+#     "item": {
+#         "name": "EuLa",
+#         "height": 1.70,
+#         "description": "你好哈哈哈",
+#         "tax": 3.44
+#     },
+#     "user": {
+#         "username": "EuLa",
+#         "full_name": "提瓦特大陆"
+#     },
+#     "importance": 5
+# }
+
+# 测试请求体 嵌套和字段验证
+# POST http://127.0.0.1:8000/request/offers/ HTTP/1.1
+# Content-Type: application/json
+
+# {
+#     "name": "offers",
+#     "items": [
+#         {
+#             "name": "itemoffer",
+#             "tax": 3.22,
+#             "images": [
+#                 {
+#                     "url": "http://127.0.0.1:8000/test.png",
+#                     "name": "测试图片"
+#                 },
+#                 {
+#                     "url": "http://127.0.0.1:8000/test.png",
+#                     "name": "测试图片"
+#                 }
+#             ]
+#         },
+#         {
+#             "name": "itemoffer",
+#             "tax": 3.22,
+#             "images": [
+#                 {
+#                     "url": "http://127.0.0.1:8000/test.png",
+#                     "name": "测试图片"
+#                 },
+#                 {
+#                     "url": "http://127.0.0.1:8000/test.png",
+#                     "name": "测试图片"
+#                 }
+#             ]
+#         }
+#     ]
+# }
+
+# # 测试cookie
+# GET http://127.0.0.1:8000/cookie/items/ HTTP/1.1
+# Cookie: ads_id=EuLa
+
+# 测试header
+# GET http://127.0.0.1:8000/cookie/header/ HTTP/1.1
+# X-Token: foo
+# X-Token: bar
+
+# 测试cookie参数模型
+# GET http://127.0.0.1:8000/cookie/modal/ HTTP/1.1
+# Cookie: session_id=session_id; fatebook_tracker=fatebook_tracker; googall_tracker=googall_tracker
+
+# # 测试header参数模型
+# GET http://127.0.0.1:8000/cookie/headermodal/ HTTP/1.1
+# Host: 127.0.0.1:8000
+# save-data: true
+# If-Modified-Since: 2025-12-01
+# traceparent: trace-123456
+# X-Tag: foo
+# X-Tag: tom
+# X-Tag: jerry
+# X-Tag: bar
+
+# 测试返回response
+# POST http://127.0.0.1:8000/response/items/ HTTP/1.1
+# Content-Type: application/json
+
+# {
+#     "name": "EuLa",
+#     "tags": ["222", "3333"]
+# }
+
+# GET http://127.0.0.1:8000/response/items/ HTTP/1.1
+
+# # 测试直接返回Respose
+# GET http://127.0.0.1:8000/response/portal?teleport=true HTTP/1.1
+
+# 测试错误处理
+# GET http://127.0.0.1:8000/errors/items/bar HTTP/1.1
+
+# 测试依赖项：公共查询参数由 Depends 统一处理
+# GET http://127.0.0.1:8000/dependencies/items/?q=FastAPI&skip=5&limit=20 HTTP/1.1
+
+# # 测试 yield 依赖项：控制台会依次输出“创建资源”和“释放资源”
+# GET http://127.0.0.1:8000/dependencies/yield/ HTTP/1.1
+
+# 测试auth 安全
+# GET http://127.0.0.1:8000/auth/items/ HTTP/1.1
+# Authorization: Bearer fhwfwkijkfwejdfwefjwek
+
+# # 测试获取用户信息
+# GET http://127.0.0.1:8000/auth/user/me HTTP/1.1
+# Authorization: Bearer fhwfwkijkfwejdfwefjwek
+
+# 测试使用简单的auth验证密码和名字
+POST http://127.0.0.1:8000/auth/token HTTP/1.1
+Authorization: Bearer fhwfwkijkfwejdfwefjwek
+Content-Type: application/x-www-form-urlencoded
+
+username=alice&password=secret2
