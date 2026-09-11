@@ -279,3 +279,11 @@ DELETE {{dbBase}}/heroes/{{createSqlTeam.response.body.$.heroes[1].id}}
 
 ### SQLModel 21：所有成员移除后，允许删除队伍，预期 204
 DELETE {{dbBase}}/teams/{{createSqlTeam.response.body.$.id}}
+
+### 测试高级教程的 直接返回响应
+PUT http://127.0.0.1:8000/response/itemresponse/111
+Content-Type: application/json
+
+{
+    "name": "111"
+}
