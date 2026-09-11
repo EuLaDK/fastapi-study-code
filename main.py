@@ -12,6 +12,7 @@ from src.routers.dependency import router as dependency_router
 from src.routers.authSafe import router as auth_router
 from src.routers.jwtToken import router as jwt_router
 from src.routers.cors import router as cors_router
+from src.routers.sqlmodel_example import router as sqlmodel_router
 
 app = FastAPI()
 
@@ -38,6 +39,7 @@ app.include_router(dependency_router, prefix="/dependencies", tags=["依赖项�
 app.include_router(auth_router, prefix="/auth", tags=["安全验证"])
 app.include_router(jwt_router, prefix="/jwt", tags=["jwt令牌校验"])
 app.include_router(cors_router, prefix="/cors", tags=["CORS跨域"])
+app.include_router(sqlmodel_router, prefix="/db", tags=["SQLModel数据库"])
 
 
 # # 统一维护所有子路由配置

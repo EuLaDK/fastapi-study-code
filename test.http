@@ -1,3 +1,5 @@
+@dbBase = http://127.0.0.1:8000/db
+
 # GET http://127.0.0.1:8000/query/users/452423/items/435334?q=哈哈哈哈&short=off HTTP/1.1
 
 
@@ -166,3 +168,114 @@ Origin: http://localhost:5173
 OPTIONS http://127.0.0.1:8000/cors/ HTTP/1.1
 Origin: http://localhost:5173
 Access-Control-Request-Method: GET
+
+### SQLModel 1：检查 PostgreSQL 连接，预期 200
+GET {{dbBase}}/health
+
+### SQLModel 2：一次事务创建队伍和两个英雄，预期 201
+# @name createSqlTeam
+POST {{dbBase}}/teams/
+Content-Type: application/json
+
+{
+    "name": "Knights-{{$timestamp}}",
+    "headquarters": "Mondstadt",
+    "heroes": [
+        {"name": "Eula-{{$timestamp}}", "secret_name": "Eula Lawrence", "age": 25},
+        {"name": "Amber-{{$timestamp}}", "secret_name": "Outrider", "age": 20}
+    ]
+}
+
+### SQLModel 3：分页查询队伍
+GET {{dbBase}}/teams/?offset=0&limit=10
+
+### SQLModel 4：查询队伍及其英雄，响应不会暴露 secret_name
+GET {{dbBase}}/teams/{{createSqlTeam.response.body.$.id}}
+
+### SQLModel 5：单独创建英雄并加入刚创建的队伍
+# @name createSqlHero
+POST {{dbBase}}/heroes/
+Content-Type: application/json
+
+{
+    "name": "Lisa-{{$timestamp}}",
+    "secret_name": "Librarian",
+    "age": 28,
+    "team_id": {{createSqlTeam.response.body.$.id}}
+}
+
+### SQLModel 6：分页、名字模糊搜索、队伍和年龄筛选、排序；total 是筛选后的总数
+GET {{dbBase}}/heroes/?q=a&team_id={{createSqlTeam.response.body.$.id}}&min_age=20&offset=0&limit=2&sort_by=age&descending=true
+
+### SQLModel 7：查询单个英雄，包含所属队伍
+GET {{dbBase}}/heroes/{{createSqlHero.response.body.$.id}}
+
+### SQLModel 8：PATCH 只更新传入的年龄，其他字段保持不变
+PATCH {{dbBase}}/heroes/{{createSqlHero.response.body.$.id}}
+Content-Type: application/json
+
+{"age": 29}
+
+### SQLModel 9：显式 null 清空年龄、解除队伍关联
+PATCH {{dbBase}}/heroes/{{createSqlHero.response.body.$.id}}
+Content-Type: application/json
+
+{"age": null, "team_id": null}
+
+### SQLModel 10：更新队伍
+PATCH {{dbBase}}/teams/{{createSqlTeam.response.body.$.id}}
+Content-Type: application/json
+
+{"headquarters": "New Mondstadt HQ"}
+
+### SQLModel 11：重复名称触发数据库唯一约束，预期 409
+POST {{dbBase}}/heroes/
+Content-Type: application/json
+
+{"name": "{{createSqlHero.response.body.$.name}}", "secret_name": "Duplicate"}
+
+### SQLModel 12：批量事务失败，第二个英雄重名，整个新队伍和第一个英雄也不会入库（409）
+POST {{dbBase}}/teams/
+Content-Type: application/json
+
+{
+    "name": "RollbackTeam-{{$timestamp}}",
+    "headquarters": "Must not persist",
+    "heroes": [
+        {"name": "RollbackHero-{{$timestamp}}", "secret_name": "Temporary"},
+        {"name": "{{createSqlHero.response.body.$.name}}", "secret_name": "Duplicate"}
+    ]
+}
+
+### SQLModel 13：检查上一条事务已经回滚，items 为空、total 为 0
+GET {{dbBase}}/heroes/?q=RollbackHero-
+
+### SQLModel 14：年龄范围验证，预期 422
+POST {{dbBase}}/heroes/
+Content-Type: application/json
+
+{"name": "InvalidHero", "secret_name": "Invalid", "age": -1}
+
+### SQLModel 15：名称可以不传，但不能传 null，预期 422
+PATCH {{dbBase}}/heroes/{{createSqlHero.response.body.$.id}}
+Content-Type: application/json
+
+{"name": null}
+
+### SQLModel 16：禁止删除仍有英雄的队伍，预期 409
+DELETE {{dbBase}}/teams/{{createSqlTeam.response.body.$.id}}
+
+### SQLModel 17：删除单独创建的英雄，预期 204（无响应体）
+DELETE {{dbBase}}/heroes/{{createSqlHero.response.body.$.id}}
+
+### SQLModel 18：查询刚删除的英雄，预期 404
+GET {{dbBase}}/heroes/{{createSqlHero.response.body.$.id}}
+
+### SQLModel 19：清理本组请求创建的第一个队伍成员，预期 204
+DELETE {{dbBase}}/heroes/{{createSqlTeam.response.body.$.heroes[0].id}}
+
+### SQLModel 20：清理第二个队伍成员，预期 204
+DELETE {{dbBase}}/heroes/{{createSqlTeam.response.body.$.heroes[1].id}}
+
+### SQLModel 21：所有成员移除后，允许删除队伍，预期 204
+DELETE {{dbBase}}/teams/{{createSqlTeam.response.body.$.id}}
